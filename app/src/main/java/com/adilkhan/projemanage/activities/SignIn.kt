@@ -8,6 +8,8 @@ import android.view.WindowManager
 import android.widget.Toast
 import com.adilkhan.projemanage.R
 import com.adilkhan.projemanage.databinding.ActivitySignInBinding
+import com.adilkhan.projemanage.firebase.FireStoreClass
+import com.adilkhan.projemanage.models.User
 import com.google.firebase.auth.FirebaseAuth
 
 class SignIn : BaseActivity() {
@@ -61,13 +63,8 @@ class SignIn : BaseActivity() {
                     hideProgressDialog()
                     if (task.isSuccessful) {
 
-                        Toast.makeText(
-                            this@SignIn,
-                            "You have successfully signed in.",
-                            Toast.LENGTH_LONG
-                        ).show()
-
-                        startActivity(Intent(this@SignIn, MainActivity::class.java))
+                        // Calling the FirestoreClass signInUser function to get the data of user from database.
+                        FireStoreClass().signInUser(this@SignIn)
                     } else {
                         Toast.makeText(
                             this@SignIn,
@@ -97,4 +94,14 @@ class SignIn : BaseActivity() {
         }
     }
     // END
+    /**
+     * A function to get the user details from the fireStore database after authentication.
+     */
+    fun signInSuccess(user: User) {
+
+        hideProgressDialog()
+
+        startActivity(Intent(this@SignIn, MainActivity::class.java))
+        this.finish()
+    }//END
 }
