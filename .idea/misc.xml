@@ -3,9 +3,16 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/adil0/AndroidStudioProjects/ProjeManage/app/src/main/res/drawable-mdpi/ic_black_color_back_24dp.xml" value="0.1285" />
+        <entry key="..\:/Users/adil0/AndroidStudioProjects/ProjeManage/app/src/main/res/drawable-mdpi/shape_button_rounded.xml" value="0.1285" />
+        <entry key="..\:/Users/adil0/AndroidStudioProjects/ProjeManage/app/src/main/res/drawable-mdpi/white_border_shape_button_rounded.xml" value="0.1285" />
         <entry key="..\:/Users/adil0/AndroidStudioProjects/ProjeManage/app/src/main/res/drawable-v24/ic_launcher_background.xml" value="0.1285" />
+        <entry key="..\:/Users/adil0/AndroidStudioProjects/ProjeManage/app/src/main/res/drawable/ic_black_color_back_24dp.xml" value="0.1285" />
         <entry key="..\:/Users/adil0/AndroidStudioProjects/ProjeManage/app/src/main/res/drawable/ic_launcher_background.xml" value="0.1285" />
+        <entry key="..\:/Users/adil0/AndroidStudioProjects/ProjeManage/app/src/main/res/layout/activity_intro.xml" value="0.17552083333333332" />
         <entry key="..\:/Users/adil0/AndroidStudioProjects/ProjeManage/app/src/main/res/layout/activity_main.xml" value="0.17552083333333332" />
+        <entry key="..\:/Users/adil0/AndroidStudioProjects/ProjeManage/app/src/main/res/layout/activity_sign_in.xml" value="0.16145833333333334" />
+        <entry key="..\:/Users/adil0/AndroidStudioProjects/ProjeManage/app/src/main/res/layout/activity_sign_up.xml" value="0.17552083333333332" />
         <entry key="..\:/Users/adil0/AndroidStudioProjects/ProjeManage/app/src/main/res/layout/activity_splash.xml" value="0.1" />
       </map>
     </option>
