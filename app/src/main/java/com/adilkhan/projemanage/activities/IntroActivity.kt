@@ -7,7 +7,7 @@ import android.view.WindowManager
 import com.adilkhan.projemanage.R
 import com.adilkhan.projemanage.databinding.ActivityIntroBinding
 
-class IntroActivity : AppCompatActivity() {
+class IntroActivity : BaseActivity() {
     private var bindingIntro : ActivityIntroBinding? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

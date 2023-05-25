@@ -19,6 +19,9 @@
     <color name="primary_text_color">#363A43</color>
     <color name="secondary_text_color">#7A8089</color>
     <!--END-->
+    <!--TODO (Step 8: Add all the color values here.)-->
+    <color name="snackbar_error_color">#F72400</color>
+
 
 
 </resources>
