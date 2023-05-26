@@ -36,7 +36,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         // TODO (Step 3: Call a function to get the current logged in user details.)
         // START
         // Get the current logged in user details.
-        FireStoreClass().signInUser(this@MainActivity)
+        FireStoreClass().loadUserData(this@MainActivity)
         // END
     }
     // TODO (Step 5: Add a onBackPressed function and check if the navigation drawer is open or closed.)
@@ -58,7 +58,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         when (menuItem.itemId) {
             R.id.nav_my_profile -> {
 
-                Toast.makeText(this@MainActivity, "My Profile", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this@MainActivity, MyProfileActivity::class.java))
             }
 
             R.id.nav_sign_out -> {

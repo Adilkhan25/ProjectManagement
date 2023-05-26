@@ -3,6 +3,7 @@ package com.adilkhan.projemanage.firebase
 import android.app.Activity
 import android.util.Log
 import com.adilkhan.projemanage.activities.MainActivity
+import com.adilkhan.projemanage.activities.MyProfileActivity
 import com.adilkhan.projemanage.activities.SignIn
 import com.adilkhan.projemanage.activities.SignUp
 import com.adilkhan.projemanage.models.User
@@ -42,7 +43,7 @@ class FireStoreClass {
     /**
      * A function to SignIn using firebase and get the user details from Firestore Database.
      */
-    fun signInUser(activity: Activity) {
+    fun loadUserData(activity: Activity) {
 
         // Here we pass the collection name from which we wants the data.
         mFireStore.collection(Constant.USERS)
@@ -66,6 +67,9 @@ class FireStoreClass {
                     is MainActivity -> {
                         activity.updateNavigationUserDetails(loggedInUser)
                     }
+                    is MyProfileActivity->{
+                        activity.setUserDataInUI(loggedInUser)
+                    }
                     // END
                 }
                 // END
@@ -79,6 +83,9 @@ class FireStoreClass {
                         activity.hideProgressDialog()
                     }
                     is MainActivity -> {
+                        activity.hideProgressDialog()
+                    }
+                    is MyProfileActivity ->{
                         activity.hideProgressDialog()
                     }
                     // END
