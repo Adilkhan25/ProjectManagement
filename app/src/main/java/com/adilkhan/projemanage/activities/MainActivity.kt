@@ -4,11 +4,16 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.GravityCompat
 import com.adilkhan.projemanage.R
 import com.adilkhan.projemanage.databinding.ActivityMainBinding
 import com.adilkhan.projemanage.databinding.AppBarMainBinding
+import com.adilkhan.projemanage.firebase.FireStoreClass
+import com.adilkhan.projemanage.models.User
+import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 
@@ -27,6 +32,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         // START
         // Assign the NavigationView.OnNavigationItemSelectedListener to navigation view.
         bindingMainActivity.navView.setNavigationItemSelectedListener(this)
+        // END
+        // TODO (Step 3: Call a function to get the current logged in user details.)
+        // START
+        // Get the current logged in user details.
+        FireStoreClass().signInUser(this@MainActivity)
         // END
     }
     // TODO (Step 5: Add a onBackPressed function and check if the navigation drawer is open or closed.)
@@ -100,6 +110,32 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         } else {
             bindingMainActivity.drawerLayout.openDrawer(GravityCompat.START)
         }
+    }
+    // END
+    // TODO (Step 5: Create a function to update the user details in the navigation view.)
+    // START
+    /**
+     * A function to get the current user details from firebase.
+     */
+    fun updateNavigationUserDetails(user: User) {
+        // The instance of the header view of the navigation view.
+        val headerView = bindingMainActivity.navView.getHeaderView(0)
+
+        // The instance of the user image of the navigation view.
+        val navUserImage = headerView.findViewById<ImageView>(R.id.iv_user_image)
+
+        // Load the user image in the ImageView.
+        Glide
+            .with(this@MainActivity)
+            .load(user.image) // URL of the image
+            .centerCrop() // Scale type of the image.
+            .placeholder(R.drawable.ic_user_place_holder) // A default place holder
+            .into(navUserImage) // the view in which the image will be loaded.
+
+        // The instance of the user name TextView of the navigation view.
+        val navUsername = headerView.findViewById<TextView>(R.id.tv_username)
+        // Set the user name
+        navUsername.text = user.name
     }
     // END
 }
