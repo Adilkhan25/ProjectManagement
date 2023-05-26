@@ -49,6 +49,12 @@ dependencies {
     // END
     // Firebase Cloud Firestore Dependency
     implementation 'com.google.firebase:firebase-firestore:24.6.0'
+    // TODO (Step 1: Add the firebase storage dependency.)
+    // START
+    // Firebase Storage Dependency
+    implementation 'com.google.firebase:firebase-storage:20.2.0'
+    // END
+
     // circular image view dependency
     implementation 'de.hdodenhof:circleimageview:3.1.0'
     // TODO (Step 4: Add a Image Loading library.)

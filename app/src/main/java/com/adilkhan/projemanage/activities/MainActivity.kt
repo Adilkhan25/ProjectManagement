@@ -1,8 +1,10 @@
 package com.adilkhan.projemanage.activities
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
@@ -58,7 +60,10 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         when (menuItem.itemId) {
             R.id.nav_my_profile -> {
 
-                startActivity(Intent(this@MainActivity, MyProfileActivity::class.java))
+                // TODO (Step 2: Launch the my profile activity for Result.)
+                // START
+                startActivityForResult(Intent(this@MainActivity, MyProfileActivity::class.java), MY_PROFILE_REQUEST_CODE)
+                // END
             }
 
             R.id.nav_sign_out -> {
@@ -136,6 +141,34 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         val navUsername = headerView.findViewById<TextView>(R.id.tv_username)
         // Set the user name
         navUsername.text = user.name
+    }
+    // END
+
+
+    // TODO (Step 4: Add the onActivityResult function and check the result of the activity for which we expect the result.)
+    // START
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == Activity.RESULT_OK
+            && requestCode == MY_PROFILE_REQUEST_CODE
+        ) {
+            // Get the user updated details.
+            FireStoreClass().loadUserData(this@MainActivity)
+        } else {
+            Log.e("Cancelled", "Cancelled")
+        }
+    }
+    // END
+
+    // TODO (Step 1: Create a companion object and a constant variable for My profile Screen result.)
+    // START
+    /**
+     * A companion object to declare the constants.
+     */
+    companion object {
+        //A unique code for starting the activity for result
+        const val MY_PROFILE_REQUEST_CODE: Int = 11
     }
     // END
 }
