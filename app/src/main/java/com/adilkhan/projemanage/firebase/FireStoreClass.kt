@@ -3,12 +3,10 @@ package com.adilkhan.projemanage.firebase
 import android.app.Activity
 import android.util.Log
 import android.widget.Toast
-import com.adilkhan.projemanage.activities.MainActivity
-import com.adilkhan.projemanage.activities.MyProfileActivity
-import com.adilkhan.projemanage.activities.SignIn
-import com.adilkhan.projemanage.activities.SignUp
+import com.adilkhan.projemanage.activities.*
+import com.adilkhan.projemanage.models.Board
 import com.adilkhan.projemanage.models.User
-import com.adilkhan.projemanage.utils.Constant
+import com.adilkhan.projemanage.utils.Constants
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -22,7 +20,7 @@ class FireStoreClass {
      */
     fun registerUser(activity: SignUp, userInfo: User) {
 
-        mFireStore.collection(Constant.USERS)
+        mFireStore.collection(Constants.USERS)
             // Document ID for users fields. Here the document it is the User ID.
             .document(getCurrentUserID())
             // Here the userInfo are Field and the SetOption is set to merge. It is for if we wants to merge
@@ -44,10 +42,10 @@ class FireStoreClass {
     /**
      * A function to SignIn using firebase and get the user details from Firestore Database.
      */
-    fun loadUserData(activity: Activity) {
+    fun loadUserData(activity: Activity, readBoardsList: Boolean = false) {
 
         // Here we pass the collection name from which we wants the data.
-        mFireStore.collection(Constant.USERS)
+        mFireStore.collection(Constants.USERS)
             // The document id to get the Fields of user.
             .document(getCurrentUserID())
             .get()
@@ -66,7 +64,7 @@ class FireStoreClass {
                         activity.signInSuccess(loggedInUser)
                     }
                     is MainActivity -> {
-                        activity.updateNavigationUserDetails(loggedInUser)
+                        activity.updateNavigationUserDetails(loggedInUser,readBoardsList)
                     }
                     is MyProfileActivity->{
                         activity.setUserDataInUI(loggedInUser)
@@ -105,7 +103,7 @@ class FireStoreClass {
      * A function to update the user profile data into the database.
      */
     fun updateUserProfileData(activity: MyProfileActivity, userHashMap: HashMap<String, Any>) {
-        mFireStore.collection(Constant.USERS) // Collection Name
+        mFireStore.collection(Constants.USERS) // Collection Name
             .document(getCurrentUserID()) // Document ID
             .update(userHashMap) // A hashmap of fields which are to be updated.
             .addOnSuccessListener {
@@ -127,6 +125,64 @@ class FireStoreClass {
             }
     }
     // END
+//    **
+//    * A function for creating a board and making an entry in the database.
+//    */
+    fun createBoard(activity: CreateBoardActivity, board: Board) {
+
+        mFireStore.collection(Constants.BOARDS)
+            .document()
+            .set(board, SetOptions.merge())
+            .addOnSuccessListener {
+                Log.e(activity.javaClass.simpleName, "Board created successfully.")
+
+                Toast.makeText(activity, "Board created successfully.", Toast.LENGTH_SHORT).show()
+
+                activity.boardCreatedSuccessfully()
+            }
+            .addOnFailureListener { e ->
+                activity.hideProgressDialog()
+                Log.e(
+                    activity.javaClass.simpleName,
+                    "Error while creating a board.",
+                    e
+                )
+            }
+    }
+    /**
+     * A function to get the list of created boards from the database.
+     */
+    fun getBoardsList(activity: MainActivity) {
+
+        // The collection name for BOARDS
+        mFireStore.collection(Constants.BOARDS)
+            // A where array query as we want the list of the board in which the user is assigned. So here you can pass the current user id.
+            .whereArrayContains(Constants.ASSIGNED_TO, getCurrentUserID())
+            .get() // Will get the documents snapshots.
+            .addOnSuccessListener { document ->
+                // Here we get the list of boards in the form of documents.
+                Log.e(activity.javaClass.simpleName, document.documents.toString())
+                // Here we have created a new instance for Boards ArrayList.
+                val boardsList: ArrayList<Board> = ArrayList()
+
+                // A for loop as per the list of documents to convert them into Boards ArrayList.
+                for (i in document.documents) {
+
+                    val board = i.toObject(Board::class.java)!!
+                    board.documentId = i.id
+
+                    boardsList.add(board)
+                }
+
+                // Here pass the result to the base activity.
+                activity.populateBoardsListToUI(boardsList)
+            }
+            .addOnFailureListener { e ->
+
+                activity.hideProgressDialog()
+                Log.e(activity.javaClass.simpleName, "Error while creating a board.", e)
+            }
+    }
 
     /**
      * A function for getting the user id of current logged user.

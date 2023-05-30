@@ -5,11 +5,8 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
-import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -17,7 +14,7 @@ import com.adilkhan.projemanage.R
 import com.adilkhan.projemanage.databinding.ActivityMyProfileBinding
 import com.adilkhan.projemanage.firebase.FireStoreClass
 import com.adilkhan.projemanage.models.User
-import com.adilkhan.projemanage.utils.Constant
+import com.adilkhan.projemanage.utils.Constants
 import com.bumptech.glide.Glide
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -55,7 +52,7 @@ class MyProfileActivity : BaseActivity() {
             ) {
                 // TODO (Step 8: Call the image chooser function.)
                 // START
-                showImageChooser()
+                Constants.showImageChooser(this)
                 // END
             } else {
                 /*Requests permissions to be granted to this application. These permissions
@@ -64,7 +61,7 @@ class MyProfileActivity : BaseActivity() {
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                    READ_STORAGE_PERMISSION_CODE
+                    Constants.READ_STORAGE_PERMISSION_CODE
                 )
             }
         }
@@ -92,7 +89,7 @@ class MyProfileActivity : BaseActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK
-            && requestCode == PICK_IMAGE_REQUEST_CODE
+            && requestCode == Constants.PICK_IMAGE_REQUEST_CODE
             && data!!.data != null
         ) {
             // The uri of selection image from phone storage.
@@ -128,12 +125,12 @@ class MyProfileActivity : BaseActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == READ_STORAGE_PERMISSION_CODE) {
+        if (requestCode == Constants.READ_STORAGE_PERMISSION_CODE) {
             //If permission is granted
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // TODO (Step 9: Call the image chooser function.)
                 // START
-                showImageChooser()
+                Constants.showImageChooser(this)
                 // END
             } else {
                 //Displaying another toast if permission is not granted
@@ -188,20 +185,6 @@ class MyProfileActivity : BaseActivity() {
             bindingProfileActivity.etMobile.setText(user.mobile.toString())
         }
     }
-    // TODO (Step 7: Create a function for image selection from phone storage.)
-    // START
-    /**
-     * A function for user profile image selection from phone storage.
-     */
-    private fun showImageChooser() {
-        // An intent for launching the image selection of phone storage.
-        val galleryIntent = Intent(
-            Intent.ACTION_PICK,
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        )
-        // Launches the image selection of phone storage using the constant code.
-        startActivityForResult(galleryIntent, PICK_IMAGE_REQUEST_CODE)
-    }
     // END
     // TODO (Step 3: Create a function to upload the selected user image to storage and get the url of it to store in the database.)
     // START
@@ -224,7 +207,7 @@ class MyProfileActivity : BaseActivity() {
 
             //getting the storage reference
             val sRef: StorageReference = FirebaseStorage.getInstance().reference.child(
-                "USER_IMAGE" + System.currentTimeMillis() + "." + getFileExtension(
+                "USER_IMAGE" + System.currentTimeMillis() + "." + Constants.getFileExtension(this,
                     mSelectedImageFileUri
                 )
             )
@@ -262,24 +245,7 @@ class MyProfileActivity : BaseActivity() {
         }
     }
 
-    // TODO (Step 2: Create a function to get the extension of the selected image.)
-    // START
-    /**
-     * A function to get the extension of selected image.
-     */
-    private fun getFileExtension(uri: Uri?): String? {
-        /*
-         * MimeTypeMap: Two-way map that maps MIME-types to file extensions and vice versa.
-         *
-         * getSingleton(): Get the singleton instance of MimeTypeMap.
-         *
-         * getExtensionFromMimeType: Return the registered extension for the given MIME type.
-         *
-         * contentResolver.getType: Return the MIME type of the given content URL.
-         */
-        return MimeTypeMap.getSingleton().getExtensionFromMimeType(contentResolver.getType(uri!!))
-    }
-    // END
+
 
     // TODO (Step 9: Update the user profile details into the database.)
     // START
@@ -291,15 +257,15 @@ class MyProfileActivity : BaseActivity() {
         val userHashMap = HashMap<String, Any>()
 
         if (mProfileImageURL.isNotEmpty() && mProfileImageURL != mUserDetails.image) {
-            userHashMap[Constant.IMAGE] = mProfileImageURL
+            userHashMap[Constants.IMAGE] = mProfileImageURL
         }
 
         if (bindingProfileActivity.etName.text.toString() != mUserDetails.name) {
-            userHashMap[Constant.NAME] = bindingProfileActivity.etName.text.toString()
+            userHashMap[Constants.NAME] = bindingProfileActivity.etName.text.toString()
         }
 
         if (bindingProfileActivity.etMobile.text.toString() != mUserDetails.mobile.toString()) {
-            userHashMap[Constant.MOBILE] = bindingProfileActivity.etMobile.text.toString().toLong()
+            userHashMap[Constants.MOBILE] = bindingProfileActivity.etMobile.text.toString().toLong()
         }
 
         // Update the data in the database.
@@ -320,22 +286,6 @@ class MyProfileActivity : BaseActivity() {
         setResult(Activity.RESULT_OK)
         // END
         finish()
-    }
-    // END
-
-    // TODO (Step 3: Create a companion object and add a constant for Read Storage runtime permission.)
-    // START
-    /**
-     * A companion object to declare the constants.
-     */
-    companion object {
-        //A unique code for asking the Read Storage Permission using this we will be check and identify in the method onRequestPermissionsResult
-        private const val READ_STORAGE_PERMISSION_CODE = 1
-
-        // TODO (Step 6: Add a constant for image selection from phone storage)
-        // START
-        private const val PICK_IMAGE_REQUEST_CODE = 2
-        // END
     }
     // END
 }

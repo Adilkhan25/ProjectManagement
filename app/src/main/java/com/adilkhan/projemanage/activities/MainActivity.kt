@@ -2,47 +2,58 @@ package com.adilkhan.projemanage.activities
 
 import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.view.GravityCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.adilkhan.projemanage.R
+import com.adilkhan.projemanage.adapter.BoardItemsAdapter
 import com.adilkhan.projemanage.databinding.ActivityMainBinding
-import com.adilkhan.projemanage.databinding.AppBarMainBinding
 import com.adilkhan.projemanage.firebase.FireStoreClass
+import com.adilkhan.projemanage.models.Board
 import com.adilkhan.projemanage.models.User
+import com.adilkhan.projemanage.utils.Constants
 import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
     lateinit var bindingMainActivity:ActivityMainBinding
+    private lateinit var mUserName: String
+
+    /**
+     * This function is auto created by Android when the Activity Class is created.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
+        //This call the parent constructor
         super.onCreate(savedInstanceState)
         bindingMainActivity = ActivityMainBinding.inflate(layoutInflater)
+        // This is used to align the xml view to this class
         setContentView(bindingMainActivity.root)
-        // TODO (Step 4: Call the setup action bar function here.)
-        // START
-        setupActionBar()
-        // END
 
-        // TODO (Step 8: Assign the NavigationView.OnNavigationItemSelectedListener to navigation view.)
-        // START
+        setupActionBar()
+
         // Assign the NavigationView.OnNavigationItemSelectedListener to navigation view.
         bindingMainActivity.navView.setNavigationItemSelectedListener(this)
-        // END
-        // TODO (Step 3: Call a function to get the current logged in user details.)
-        // START
+
         // Get the current logged in user details.
-        FireStoreClass().loadUserData(this@MainActivity)
-        // END
+        showProgressDialog(resources.getString(R.string.please_wait))
+        FireStoreClass().loadUserData(this@MainActivity,true)
+
+        bindingMainActivity.toolbarMAin.fabCreateBoard.setOnClickListener {
+            val intent = Intent(this@MainActivity, CreateBoardActivity::class.java)
+            intent.putExtra(Constants.NAME, mUserName)
+            // TODO (Step 2: Here now pass the unique code for StartActivityForResult.)
+            // START
+            startActivityForResult(intent, CREATE_BOARD_REQUEST_CODE)
+            // END
+        }
     }
-    // TODO (Step 5: Add a onBackPressed function and check if the navigation drawer is open or closed.)
-    // START
+
     override fun onBackPressed() {
         if (bindingMainActivity.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             bindingMainActivity.drawerLayout.closeDrawer(GravityCompat.START)
@@ -51,19 +62,12 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             doubleBackToExit()
         }
     }
-    // END
-    // TODO (Step 7: Implement members of NavigationView.OnNavigationItemSelectedListener.)
-    // START
+
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
-        // TODO (Step 9: Add the click events of navigation menu items.)
-        // START
         when (menuItem.itemId) {
             R.id.nav_my_profile -> {
 
-                // TODO (Step 2: Launch the my profile activity for Result.)
-                // START
                 startActivityForResult(Intent(this@MainActivity, MyProfileActivity::class.java), MY_PROFILE_REQUEST_CODE)
-                // END
             }
 
             R.id.nav_sign_out -> {
@@ -78,33 +82,45 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             }
         }
         bindingMainActivity.drawerLayout.closeDrawer(GravityCompat.START)
-        // END
         return true
     }
-    // END
 
-    // TODO (Step 1: Create a function to setup action bar.)
-    // START
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == Activity.RESULT_OK
+            && requestCode == MY_PROFILE_REQUEST_CODE
+        ) {
+            // Get the user updated details.
+            FireStoreClass().loadUserData(this@MainActivity)
+        }
+        // TODO (Step 4: Here if the result is OK get the updated boards list.)
+        // START
+        else if (resultCode == Activity.RESULT_OK
+            && requestCode == CREATE_BOARD_REQUEST_CODE
+        ) {
+            // Get the latest boards list.
+            FireStoreClass().getBoardsList(this@MainActivity)
+        }
+        // END
+        else {
+            Log.e("Cancelled", "Cancelled")
+        }
+    }
+
     /**
      * A function to setup action bar
      */
     private fun setupActionBar() {
-        // val progressDialogBinding = DialogProgressBinding.inflate(layoutInflater)
-       // val bindingAppBarMain = AppBarMainBinding.inflate(layoutInflater)
-       // setSupportActionBar(bindingAppBarMain.toolbarMainActivity)
+
+        setSupportActionBar(bindingMainActivity.toolbarMAin.toolbarMainActivity)
         bindingMainActivity.toolbarMAin.toolbarMainActivity.setNavigationIcon(R.drawable.ic_action_navigation_menu)
 
-        // TODO (Step 3: Add click event for navigation in the action bar and call the toggleDrawer function.)
-        // START
         bindingMainActivity.toolbarMAin.toolbarMainActivity.setNavigationOnClickListener {
             toggleDrawer()
         }
-        // END
     }
-    // END
 
-    // TODO (Step 2: Create a function for opening and closing the Navigation Drawer.)
-    // START
     /**
      * A function for opening and closing the Navigation Drawer.
      */
@@ -116,13 +132,14 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             bindingMainActivity.drawerLayout.openDrawer(GravityCompat.START)
         }
     }
-    // END
-    // TODO (Step 5: Create a function to update the user details in the navigation view.)
-    // START
+
     /**
      * A function to get the current user details from firebase.
      */
-    fun updateNavigationUserDetails(user: User) {
+    fun updateNavigationUserDetails(user: User,readBoardList:Boolean) {
+        hideProgressDialog()
+        mUserName = user.name
+
         // The instance of the header view of the navigation view.
         val headerView = bindingMainActivity.navView.getHeaderView(0)
 
@@ -141,34 +158,42 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         val navUsername = headerView.findViewById<TextView>(R.id.tv_username)
         // Set the user name
         navUsername.text = user.name
-    }
-    // END
-
-
-    // TODO (Step 4: Add the onActivityResult function and check the result of the activity for which we expect the result.)
-    // START
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (resultCode == Activity.RESULT_OK
-            && requestCode == MY_PROFILE_REQUEST_CODE
-        ) {
-            // Get the user updated details.
-            FireStoreClass().loadUserData(this@MainActivity)
-        } else {
-            Log.e("Cancelled", "Cancelled")
+        if(readBoardList) {
+            FireStoreClass().getBoardsList(this@MainActivity)
         }
     }
-    // END
+    /**
+     * A function to populate the result of BOARDS list in the UI i.e in the recyclerView.
+     */
+    fun populateBoardsListToUI(boardsList: ArrayList<Board>) {
 
-    // TODO (Step 1: Create a companion object and a constant variable for My profile Screen result.)
-    // START
+        hideProgressDialog()
+
+        if (boardsList.size > 0) {
+
+            bindingMainActivity.toolbarMAin.mainContentUi.rvBoardsList.visibility = View.VISIBLE
+            bindingMainActivity.toolbarMAin.mainContentUi.tvNoBoardsAvailable.visibility = View.GONE
+
+            bindingMainActivity.toolbarMAin.mainContentUi.rvBoardsList.layoutManager = LinearLayoutManager(this@MainActivity)
+            bindingMainActivity.toolbarMAin.mainContentUi.rvBoardsList.setHasFixedSize(true)
+
+            // Create an instance of BoardItemsAdapter and pass the boardList to it.
+            val adapter = BoardItemsAdapter(this@MainActivity, boardsList)
+            bindingMainActivity.toolbarMAin.mainContentUi.rvBoardsList.adapter = adapter // Attach the adapter to the recyclerView.
+
+        } else {
+            bindingMainActivity.toolbarMAin.mainContentUi.rvBoardsList.visibility = View.GONE
+            bindingMainActivity.toolbarMAin.mainContentUi.tvNoBoardsAvailable.visibility = View.VISIBLE
+        }
+    }
+
     /**
      * A companion object to declare the constants.
      */
     companion object {
         //A unique code for starting the activity for result
         const val MY_PROFILE_REQUEST_CODE: Int = 11
+        // TODO (Step 1: Add a unique code for starting the create board activity for result)
+        const val CREATE_BOARD_REQUEST_CODE: Int = 12
     }
-    // END
 }
